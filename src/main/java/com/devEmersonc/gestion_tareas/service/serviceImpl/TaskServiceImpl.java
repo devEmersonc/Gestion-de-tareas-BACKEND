@@ -2,8 +2,8 @@ package com.devEmersonc.gestion_tareas.service.serviceImpl;
 
 import com.devEmersonc.gestion_tareas.dto.SaveTaskDTO;
 import com.devEmersonc.gestion_tareas.dto.TaskDTO;
+import com.devEmersonc.gestion_tareas.exception.AccessDeniedException;
 import com.devEmersonc.gestion_tareas.exception.TaskNotFoundException;
-import com.devEmersonc.gestion_tareas.exception.UnauthorizedException;
 import com.devEmersonc.gestion_tareas.exception.UserNotFoundException;
 import com.devEmersonc.gestion_tareas.model.Task;
 import com.devEmersonc.gestion_tareas.model.User;
@@ -93,16 +93,27 @@ public class TaskServiceImpl implements TaskService {
                 task.setExpiration_date(saveTaskDTO.getExpiration_date());
                 taskRepository.save(task);
             } else {
-                throw new UnauthorizedException("No tienes permisos para realizar esta acción.");
+                throw new AccessDeniedException("No tienes permisos para realizar esta tarea.");
             }
         }
 
     }
 
     @Override
-    public void deleteTask(Long id) {
+    public void deleteTask(Long id, User currentUser) {
         Task task = taskRepository.findById(id).orElseThrow(() -> new TaskNotFoundException("La tarea ingresada no existe."));
-        taskRepository.deleteById(task.getId());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String role = authentication.getAuthorities().toString();
+
+        if(role.contains("ROLE_ADMIN")) {
+            taskRepository.deleteById(id);
+        }else if(role.contains("ROLE_USER")) {
+            if(currentUser.getId().equals(task.getUser().getId())) {
+                taskRepository.deleteById(id);
+            }else {
+                throw new AccessDeniedException("No tienes permisos para realizar esta tarea.");
+            }
+        }
     }
 
     @Override

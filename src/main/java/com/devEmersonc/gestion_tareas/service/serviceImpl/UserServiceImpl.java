@@ -2,6 +2,7 @@ package com.devEmersonc.gestion_tareas.service.serviceImpl;
 
 import com.devEmersonc.gestion_tareas.dto.RegisterUserDTO;
 import com.devEmersonc.gestion_tareas.dto.UserDTO;
+import com.devEmersonc.gestion_tareas.exception.AccessDeniedException;
 import com.devEmersonc.gestion_tareas.exception.UserNotFoundException;
 import com.devEmersonc.gestion_tareas.model.User;
 import com.devEmersonc.gestion_tareas.repository.RoleRepository;
@@ -62,19 +63,42 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUser(Long id, RegisterUserDTO registerUserDTO) {
+    public void updateUser(Long id, RegisterUserDTO registerUserDTO, User currentUser) {
         User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException());
-        user.setUsername(registerUserDTO.getUsername());
-        user.setPassword(passwordEncoder.encode(registerUserDTO.getPassword()));
-        user.setEmail(registerUserDTO.getEmail());
-        user.setRoles(user.getRoles());
-        userRepository.save(user);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String role = authentication.getAuthorities().toString();
+
+        if(role.contains("ROLE_ADMIN")) {
+            user.setUsername(registerUserDTO.getUsername());
+            user.setPassword(passwordEncoder.encode(registerUserDTO.getPassword()));
+            user.setEmail(registerUserDTO.getEmail());
+            user.setRoles(user.getRoles());
+            userRepository.save(user);
+        } else if(role.contains("ROLE_USER")) {
+            if(user.getId().equals(currentUser.getId())) {
+                user.setUsername(registerUserDTO.getUsername());
+                user.setPassword(passwordEncoder.encode(registerUserDTO.getPassword()));
+                user.setEmail(registerUserDTO.getEmail());
+                user.setRoles(user.getRoles());
+                userRepository.save(user);
+            } else {
+                throw new AccessDeniedException("No tienes permisos para realizar esta tarea.");
+            }
+        }
     }
 
     @Override
-    public void deleteUser(Long id) {
+    public void deleteUser(Long id, User currentUser) {
         User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException());
-        userRepository.deleteById(user.getId());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String role = authentication.getAuthorities().toString();
+
+        if(role.contains("ROLE_ADMIN")) {
+            userRepository.deleteById(user.getId());
+        }else {
+            throw new AccessDeniedException("No tienes permisos para realizar esta tarea.");
+        }
+
     }
 
     @Override

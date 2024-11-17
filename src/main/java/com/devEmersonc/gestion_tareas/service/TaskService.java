@@ -14,6 +14,6 @@ public interface TaskService {
     TaskDTO getTaksById(Long id);
     void saveNewTask(SaveTaskDTO saveTaskDTO, User user);
     void updateUpdateTask(Long id, SaveTaskDTO saveTaskDTO, User user);
-    void deleteTask(Long id);
+    void deleteTask(Long id, User currentUser);
     TaskDTO convertEntityToDto(Task task);
 }

@@ -2,12 +2,14 @@ package com.devEmersonc.gestion_tareas.controller;
 
 import com.devEmersonc.gestion_tareas.dto.RegisterUserDTO;
 import com.devEmersonc.gestion_tareas.dto.UserDTO;
+import com.devEmersonc.gestion_tareas.model.User;
 import com.devEmersonc.gestion_tareas.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -44,14 +46,16 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateUser(@Valid @RequestBody RegisterUserDTO registerUserDTO, @PathVariable Long id) {
-        userService.updateUser(id, registerUserDTO);
+    public ResponseEntity<String> updateUser(@Valid @RequestBody RegisterUserDTO registerUserDTO, @PathVariable Long id, Principal principal) {
+        User currentUser = userService.getCurrentUser(principal.getName());
+        userService.updateUser(id, registerUserDTO, currentUser);
         return ResponseEntity.status(HttpStatus.CREATED).body("Usuario actualizado.");
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
+    public ResponseEntity<String> deleteUser(@PathVariable Long id, Principal principal) {
+        User currentUser = userService.getCurrentUser(principal.getName());
+        userService.deleteUser(id, currentUser);
         return ResponseEntity.ok("Usuario eliminado.");
     }
 }

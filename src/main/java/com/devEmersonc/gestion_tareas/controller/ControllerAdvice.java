@@ -1,8 +1,8 @@
 package com.devEmersonc.gestion_tareas.controller;
 
 import com.devEmersonc.gestion_tareas.dto.ErrorMessage;
+import com.devEmersonc.gestion_tareas.exception.AccessDeniedException;
 import com.devEmersonc.gestion_tareas.exception.TaskNotFoundException;
-import com.devEmersonc.gestion_tareas.exception.UnauthorizedException;
 import com.devEmersonc.gestion_tareas.exception.UserNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,17 +36,16 @@ public class ControllerAdvice extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
     }
 
-    @ExceptionHandler(UnauthorizedException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    public ResponseEntity<Object> unauthorizedExceptionHandle(UnauthorizedException exception) {
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ResponseEntity<Object> accessDeniedExceptionHandling(AccessDeniedException exception) {
         Map<String, Object> response = new HashMap<>();
-
-        response.put("status", HttpStatus.UNAUTHORIZED.value() + " " + HttpStatus.UNAUTHORIZED.getReasonPhrase());
-        response.put("error", "No autorizado");
+        response.put("status", HttpStatus.FORBIDDEN.value() + " " + HttpStatus.FORBIDDEN.getReasonPhrase());
+        response.put("error", "Acceso denegado.");
         response.put("message", exception.getMessage());
-        response.put("timestamp", LocalDateTime.now().toString());
+        response.put("timestamp", LocalDate.now().toString());
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
     @Override

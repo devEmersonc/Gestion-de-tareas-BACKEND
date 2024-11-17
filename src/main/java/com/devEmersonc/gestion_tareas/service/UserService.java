@@ -11,8 +11,8 @@ public interface UserService {
     UserDTO getUser(Long id);
     void saveUser(RegisterUserDTO registerUserDTO);
     void saveUserAdmin(RegisterUserDTO registerUserDTO);
-    void updateUser(Long id, RegisterUserDTO registerUserDTO);
-    void deleteUser(Long id);
+    void updateUser(Long id, RegisterUserDTO registerUserDTO, User currentUser);
+    void deleteUser(Long id, User currentUser);
     User getCurrentUser(String username);
     UserDTO convertEntityToDto(User user);
 }

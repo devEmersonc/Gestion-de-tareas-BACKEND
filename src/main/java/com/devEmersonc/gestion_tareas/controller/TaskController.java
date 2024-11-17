@@ -59,8 +59,9 @@ public class TaskController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteTask(@PathVariable Long id) {
-        taskService.deleteTask(id);
+    public ResponseEntity<String> deleteTask(@PathVariable Long id, Principal principal) {
+        User currentUser = userService.getCurrentUser(principal.getName());
+        taskService.deleteTask(id, currentUser);
         return ResponseEntity.ok("Tarea eliminada exitosamente.");
     }
 }

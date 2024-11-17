@@ -22,10 +22,11 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setContentType("application/json");
 
         Map<String, Object> errorsDetails = new HashMap<>();
+        String message = authException.getMessage() != null ? authException.getMessage() : "No tienes permisos para realizar esta acción";
 
         errorsDetails.put("status", HttpServletResponse.SC_UNAUTHORIZED);
         errorsDetails.put("error", "No Autorizado");
-        errorsDetails.put("message", authException.getMessage() != null ? authException.getMessage() : "Error de autenticación. Por favor inicia sesión nuevamente.");
+        errorsDetails.put("message", message);
         errorsDetails.put("timestamp", LocalDateTime.now().toString());
         errorsDetails.put("path", request.getRequestURI());
 
